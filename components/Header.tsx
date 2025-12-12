@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Stethoscope, HelpCircle, FileText } from 'lucide-react';
+import { Menu, X, Stethoscope, HelpCircle, FileText, Briefcase, Baby, User } from 'lucide-react';
 import Link from 'next/link';
 import { NAV_LINKS } from '@/lib/constants'; 
 
@@ -24,7 +24,6 @@ export const Header = () => {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    // Проверяем скролл сразу при загрузке, чтобы не было мигания если страница обновлена не в топе
     handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -34,20 +33,27 @@ export const Header = () => {
   const textColorClass = scrolled ? 'text-gray-600 hover:text-brand-purple' : 'text-white/90 hover:text-white';
   const logoColorClass = scrolled ? 'text-brand-purple' : 'text-white';
   const buttonBgClass = scrolled ? 'bg-brand-purple text-white' : 'bg-white text-brand-purple';
-  const burgerColorClass = scrolled ? 'text-brand-purple' : 'text-white';
+  
+  // ИСПРАВЛЕНИЕ 1: Цвет бургера/крестика
+  // Если меню открыто (isOpen), кнопка всегда должна быть темной (или фиолетовой), так как фон меню белый.
+  // Если меню закрыто, то цвет зависит от скролла (белый на прозрачном хедере, фиолетовый на белом хедере).
+  const burgerColorClass = isOpen 
+    ? 'text-gray-900' 
+    : (scrolled ? 'text-brand-purple' : 'text-white');
 
   return (
     <>
       <nav 
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
+          scrolled && !isOpen ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-6'
         }`}
       >
         <div className="container mx-auto px-6 flex justify-between items-center">
           {/* Логотип */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group relative z-50">
             <div className="flex items-center">
-               <span className={`text-2xl font-black tracking-tighter transition-colors duration-300 ${logoColorClass}`}>
+               {/* При открытом меню логотип тоже делаем темным, чтобы он был виден на белом фоне */}
+               <span className={`text-2xl font-black tracking-tighter transition-colors duration-300 ${isOpen ? 'text-brand-purple' : logoColorClass}`}>
                  ФЛЮДИТЕК
                </span>
                <div className="w-2 h-2 rounded-full bg-brand-yellow ml-1 mt-3 animate-pulse"></div>
@@ -66,16 +72,20 @@ export const Header = () => {
               </Link>
             ))}
             <Link 
-              href="/#buy" 
+              href="/#where-to-buy" 
               className={`px-6 py-2 rounded-full font-bold transition-all hover:scale-105 shadow-lg ${buttonBgClass}`}
             >
               Где купить
             </Link>
           </div>
 
-          {/* Мобильный бургер */}
-          <div className="lg:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className={`p-2 transition-colors ${burgerColorClass}`}>
+          {/* Мобильный бургер (Кнопка) */}
+          <div className="lg:hidden relative z-50">
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className={`p-2 transition-colors duration-300 ${burgerColorClass}`}
+              aria-label="Toggle menu"
+            >
               {isOpen ? <X size={32} /> : <Menu size={32} />}
             </button>
           </div>
@@ -90,9 +100,10 @@ export const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            className="fixed inset-0 z-40 bg-white lg:hidden pt-24 px-6"
+            className="fixed inset-0 z-40 bg-white lg:hidden pt-24 px-6 flex flex-col h-screen overflow-y-auto"
           >
             <div className="flex flex-col space-y-6">
+              {/* Основные ссылки */}
               {NAV_LINKS.map((link: NavLinkItem) => (
                 <Link 
                   key={link.id} 
@@ -104,12 +115,32 @@ export const Header = () => {
                   {link.title}
                 </Link>
               ))}
-              <div className="flex flex-col gap-4 pt-4">
-                 <Link href="/adults" className="w-full py-4 bg-brand-purple text-white text-center rounded-xl font-bold shadow-lg">
-                    Для взрослых
+              
+              {/* Дополнительные крупные кнопки навигации */}
+              <div className="flex flex-col gap-4 pt-4 mt-auto pb-10">
+                 <Link 
+                   href="/#products" 
+                   onClick={() => setIsOpen(false)}
+                   className="w-full py-4 bg-brand-purple text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-3"
+                 >
+                    <Briefcase size={20} />
+                    Взрослым (Саше)
                  </Link>
-                 <Link href="/parents" className="w-full py-4 bg-brand-yellow text-gray-900 text-center rounded-xl font-bold shadow-lg">
-                    Для родителей
+                 <Link 
+                   href="/#products" 
+                   onClick={() => setIsOpen(false)}
+                   className="w-full py-4 bg-brand-teal text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-3"
+                 >
+                    <User size={20} />
+                    Взрослым (Сироп)
+                 </Link>
+                 <Link 
+                   href="/#products" 
+                   onClick={() => setIsOpen(false)}
+                   className="w-full py-4 bg-brand-yellow text-gray-900 rounded-xl font-bold shadow-lg flex items-center justify-center gap-3"
+                 >
+                    <Baby size={20} />
+                    Детям
                  </Link>
               </div>
             </div>

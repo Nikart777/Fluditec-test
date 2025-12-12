@@ -7,9 +7,10 @@ import { ContraindicationBanner } from "@/components/ContraindicationBanner";
 // Загружаем шрифт Inter
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
+// 1. ОПТИМИЗАЦИЯ: Обновленные мета-данные согласно аудиту
 export const metadata: Metadata = {
-  title: "Флюдитек - Официальный сайт",
-  description: "Препарат от кашля в форме сиропа и раствора. Имеются противопоказания.",
+  title: "Флюдитек - сироп от кашля для детей и взрослых. Лечение влажного кашля.",
+  description: "Комплексное лечение кашля и насморка для всей семьи. Узнайте схему приема и где купить Флюдитек (Карбоцистеин).",
 };
 
 export default function RootLayout({
