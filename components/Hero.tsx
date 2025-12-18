@@ -199,10 +199,10 @@ export const Hero = () => {
              animate={{ opacity: 1, y: 0 }}
              className="relative z-10"
           >
-             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-xl">
-               КОМПЛЕКСНОЕ <br className="hidden lg:block"/> ЛЕЧЕНИЕ <br className="hidden lg:block"/>
+             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-xl uppercase">
+               НЕ ОТВЛЕКАЙСЯ <br />
                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeTab === 'kids-syrup' ? 'from-brand-yellow to-orange-300' : 'from-brand-teal to-blue-300'}`}>
-                 КАШЛЯ И НОСА
+                 НА КАШЕЛЬ!
                </span>
             </h1>
           </motion.div>
