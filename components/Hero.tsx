@@ -2,11 +2,55 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ShoppingCart } from 'lucide-react';
-import { HERO_PRODUCTS } from '@/lib/constants';
+import { ChevronDown, ShoppingCart, Info } from 'lucide-react';
 
-// 2. ОПТИМИЗАЦИЯ: Главный экран
-// - ИСПРАВЛЕНИЕ: Порядок элементов на мобильном (Текст -> Картинка)
+// --- CONSTANTS (Inlined to fix import issues) ---
+const BRAND_COLORS = {
+  purple: '#594BDB',
+  yellow: '#FEEE31',
+  teal: '#00adae',
+  dark: '#1a1a1a',
+  gray: '#f4f4f4'
+};
+
+const HERO_PRODUCTS = [
+  {
+    id: 'adults-sachet',
+    title: 'ФЛЮДИТЕК',
+    subtitle: 'РАСТВОР в сашÉ',
+    age: '15+',
+    color: BRAND_COLORS.purple,
+    textColor: 'text-white',
+    description: 'Облегчает кашель и заложенность носа, разжижает мокроту.',
+    instructionLink: '/upload/instruction_adult_sachet.pdf',
+    image: 'https://fluditec.ru/upload/iblock/12f/66q29fongvlm2kac38kgzc95i0s59mow.png', // Саше
+    variant: 'purple'
+  },
+  {
+    id: 'kids-syrup',
+    title: 'ФЛЮДИТЕК',
+    subtitle: 'Сироп для детей',
+    age: '2+',
+    color: BRAND_COLORS.yellow,
+    textColor: 'text-gray-900',
+    description: 'Приятный банановый вкус. Лечит кашель бережно.',
+    instructionLink: '/upload/instruction_kids.pdf',
+    image: 'https://fluditec.ru/upload/iblock/89b/qo6qv8w7t96q0nvqnuhavvai7adt16sc.png', // Сироп детский
+    variant: 'yellow'
+  },
+  {
+    id: 'adults-syrup',
+    title: 'ФЛЮДИТЕК',
+    subtitle: 'Сироп',
+    age: '15+',
+    color: BRAND_COLORS.teal,
+    textColor: 'text-white',
+    description: 'Действует на всем протяжении дыхательных путей.',
+    instructionLink: '/upload/instruction_adult_syrup.pdf',
+    image: 'https://fluditec.ru/upload/iblock/cc9/c3v3t1w09rsbf6egwl8gkd64wef0utcf.png', // Сироп взрослый
+    variant: 'teal'
+  }
+];
 
 export const Hero = () => {
   const [activeTab, setActiveTab] = useState<'adults-sachet' | 'adults-syrup' | 'kids-syrup'>('adults-sachet');
@@ -15,7 +59,7 @@ export const Hero = () => {
 
   const activeProduct = HERO_PRODUCTS.find(p => p.id === activeTab) || HERO_PRODUCTS[0];
 
-  // --- CANVAS EFFECT ---
+  // --- CANVAS EFFECT (Particles) ---
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -69,7 +113,7 @@ export const Hero = () => {
 
     const initParticles = () => {
       particles = [];
-      const count = width < 768 ? 50 : 120; 
+      const count = width < 768 ? 40 : 100; // Less particles on mobile for performance
       for (let i = 0; i < count; i++) particles.push(new AirParticle());
     };
 
@@ -92,8 +136,15 @@ export const Hero = () => {
   useEffect(() => { setMounted(true); }, []);
   if (!mounted || !activeProduct) return null;
 
+  // Tabs Data
+  const TABS = [
+      { id: 'adults-sachet', label: 'Взрослым (Саше)', mobileLabel: 'Саше 15+' },
+      { id: 'adults-syrup', label: 'Взрослым (Сироп)', mobileLabel: 'Сироп 15+' },
+      { id: 'kids-syrup', label: 'Детям', mobileLabel: 'Детям 2+' },
+  ];
+
   return (
-    <section className="relative min-h-[100dvh] pt-28 pb-12 overflow-hidden bg-brand-purple flex items-center justify-center">
+    <section className="relative h-[100dvh] overflow-hidden bg-brand-purple flex flex-col pt-20 lg:pt-28">
       
       {/* Background Canvas */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -101,56 +152,69 @@ export const Hero = () => {
         <canvas ref={canvasRef} className="block w-full h-full opacity-60 mix-blend-screen" />
       </div>
 
-      <div className="container mx-auto px-6 grid lg:grid-cols-12 gap-8 items-center relative z-20 h-full">
+      <div className="container mx-auto px-4 lg:px-6 flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 relative z-20 h-full">
         
-        {/* --- ЛЕВАЯ ЧАСТЬ: Текст и Табы --- */}
-        {/* ИСПРАВЛЕНИЕ: Убрали классы order-2 lg:order-1. Теперь этот блок идет первым в DOM и визуально тоже первым на мобильном. */}
-        <div className="lg:col-span-6 space-y-8 text-center lg:text-left pt-8 lg:pt-0">
+        {/* --- MOBILE TABS (Top, Scrollable) --- */}
+        <div className="lg:hidden w-full relative shrink-0">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar py-2 px-1 mask-linear-fade">
+                {TABS.map((tab) => (
+                    <button 
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border backdrop-blur-md
+                            ${activeTab === tab.id 
+                                ? 'bg-white text-brand-purple border-white shadow-lg scale-105' 
+                                : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/20'
+                            }`}
+                    >
+                        {tab.mobileLabel}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* --- LEFT COLUMN (Text Desktop) --- */}
+        <div className="lg:col-span-6 flex flex-col justify-center lg:items-start text-center lg:text-left order-1 lg:order-1 shrink-0 lg:shrink">
           
-          {/* ТАБЫ */}
-          <div className="inline-flex flex-wrap justify-center lg:justify-start gap-2 bg-white/10 p-1.5 rounded-3xl backdrop-blur-md border border-white/10 mb-4">
-            <button 
-              onClick={() => setActiveTab('adults-sachet')}
-              className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${activeTab === 'adults-sachet' ? 'bg-brand-purple text-white shadow-lg ring-1 ring-white/20' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
-            >
-              ВЗРОСЛЫМ (САШЕ)
-            </button>
-             <button 
-              onClick={() => setActiveTab('adults-syrup')}
-              className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${activeTab === 'adults-syrup' ? 'bg-brand-teal text-white shadow-lg' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
-            >
-              ВЗРОСЛЫМ (СИРОП)
-            </button>
-            <button 
-              onClick={() => setActiveTab('kids-syrup')}
-              className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${activeTab === 'kids-syrup' ? 'bg-brand-yellow text-gray-900 shadow-lg' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
-            >
-              ДЕТЯМ
-            </button>
+          {/* Desktop Tabs */}
+          <div className="hidden lg:inline-flex flex-wrap gap-2 bg-white/10 p-1.5 rounded-3xl backdrop-blur-md border border-white/10 mb-8 w-fit">
+            {TABS.map((tab) => (
+                <button 
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 
+                        ${activeTab === tab.id 
+                            ? 'bg-white text-brand-purple shadow-lg' 
+                            : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }`}
+                >
+                    {tab.label.toUpperCase()}
+                </button>
+            ))}
           </div>
 
-          <div className="relative z-10">
-             <motion.h1 
-               key={activeTab} 
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-[1.0] tracking-tight mb-4 drop-shadow-2xl"
-             >
-               КОМПЛЕКСНОЕ <br/> ЛЕЧЕНИЕ <br/>
+          <motion.div
+             key={activeTab + "-title"}
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="relative z-10"
+          >
+             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-xl">
+               КОМПЛЕКСНОЕ <br className="hidden lg:block"/> ЛЕЧЕНИЕ <br className="hidden lg:block"/>
                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeTab === 'kids-syrup' ? 'from-brand-yellow to-orange-300' : 'from-brand-teal to-blue-300'}`}>
                  КАШЛЯ И НОСА
                </span>
-            </motion.h1>
-          </div>
+            </h1>
+          </motion.div>
             
-          <p className="text-lg md:text-xl text-purple-100 font-medium mt-4 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+          <p className="hidden lg:block text-lg md:text-xl text-purple-100 font-medium mt-6 max-w-lg leading-relaxed">
              Флюдитек не просто разжижает мокроту, но и восстанавливает слизистую носа и бронхов. 
              <span className="block mt-2 opacity-80 font-normal text-base">
                  {activeProduct.description}
              </span>
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-6">
+          <div className="hidden lg:flex gap-4 mt-10">
             <motion.a 
               href="#where-to-buy"
               whileHover={{ scale: 1.05 }}
@@ -171,46 +235,77 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* --- ПРАВАЯ ЧАСТЬ: Продукт --- */}
-        {/* ИСПРАВЛЕНИЕ: Картинка идет второй в потоке. */}
-        <div className="lg:col-span-6 relative h-[50vh] lg:h-[70vh] flex items-center justify-center">
+        {/* --- RIGHT COLUMN (Image - Center on Mobile) --- */}
+        <div className="lg:col-span-6 relative flex-1 flex items-center justify-center order-2 lg:order-2 min-h-[30vh]">
             <AnimatePresence mode='wait'>
                 <motion.div
                     key={activeTab}
-                    initial={{ opacity: 0, x: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -50, scale: 0.9 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
                     className="relative w-full h-full flex items-center justify-center"
                 >
                     {/* Glow Effect */}
-                    <div className={`absolute w-[280px] h-[280px] md:w-[450px] md:h-[450px] rounded-full blur-[60px] md:blur-[100px] opacity-40 ${activeProduct.color === '#FEEE31' ? 'bg-brand-yellow' : activeProduct.color === '#00adae' ? 'bg-brand-teal' : 'bg-brand-purple'}`} />
+                    <div className={`absolute w-[240px] h-[240px] sm:w-[350px] sm:h-[350px] lg:w-[500px] lg:h-[500px] rounded-full blur-[50px] lg:blur-[100px] opacity-50 
+                        ${activeProduct.color === '#FEEE31' ? 'bg-brand-yellow' : activeProduct.color === '#00adae' ? 'bg-brand-teal' : 'bg-brand-purple'}`} 
+                    />
 
                     <img 
                         src={activeProduct.image} 
                         alt={activeProduct.title}
-                        className="relative z-20 w-auto h-[70%] md:h-[75%] object-contain drop-shadow-2xl"
+                        className="relative z-20 w-auto h-[75%] max-h-[400px] lg:max-h-none lg:h-[80%] object-contain drop-shadow-2xl"
                     />
 
-                    {/* Floating Badge */}
+                    {/* Age Badge */}
                     <motion.div 
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="absolute top-[5%] right-[5%] md:top-[10%] md:right-[10%] w-16 h-16 md:w-24 md:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-xl z-30 animate-bounce-slow"
+                        className="absolute bottom-[10%] right-[10%] lg:top-[10%] lg:right-[10%] lg:bottom-auto w-14 h-14 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-xl z-30 animate-bounce-slow"
                     >
-                         <span className={`text-xl md:text-3xl font-black ${activeProduct.textColor === 'text-white' ? 'text-brand-purple' : 'text-gray-900'}`}>
+                         <span className={`text-lg sm:text-xl lg:text-3xl font-black ${activeProduct.textColor === 'text-white' ? 'text-brand-purple' : 'text-gray-900'}`}>
                             {activeProduct.age}
                          </span>
-                         <span className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Возраст</span>
+                         <span className="text-[8px] lg:text-[10px] font-bold text-gray-400 uppercase">Возраст</span>
                     </motion.div>
                 </motion.div>
             </AnimatePresence>
         </div>
+
+        {/* --- MOBILE BOTTOM CONTENT (Description & CTA) --- */}
+        <div className="lg:hidden mt-auto pb-8 flex flex-col gap-4 order-3 shrink-0">
+             <motion.p 
+                key={activeTab + "-desc"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-white/80 text-sm text-center leading-relaxed px-4"
+             >
+                 {activeProduct.description}
+             </motion.p>
+
+             <div className="grid grid-cols-2 gap-3 px-2">
+                 <a 
+                    href={activeProduct.instructionLink}
+                    target="_blank"
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/10"
+                 >
+                    <Info size={16} /> Инструкция
+                 </a>
+                 <a 
+                    href="#where-to-buy"
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm bg-brand-yellow text-gray-900 shadow-lg"
+                 >
+                    <ShoppingCart size={16} /> Где купить
+                 </a>
+             </div>
+        </div>
+
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 flex flex-col items-center gap-2 pointer-events-none z-20 animate-pulse">
-        <ChevronDown size={24} />
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/30 flex flex-col items-center gap-1 pointer-events-none z-20 animate-pulse lg:bottom-6">
+        <ChevronDown size={20} className="hidden lg:block" />
       </div>
     </section>
   );
