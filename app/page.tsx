@@ -2,11 +2,11 @@ import { Hero } from "@/components/Hero";
 import { Navigator } from "@/components/Navigator";
 import { Mechanism } from "@/components/Mechanism";
 import { Dosage } from "@/components/Dosage";
-import { Advantages } from "@/components/Advantages";
+// Advantages удален, так как его содержимое перенесено в Dosage
 import { Comparison } from "@/components/Comparison";
 import { WhereToBuy } from "@/components/WhereToBuy";
 import { Footer } from "@/components/Footer";
-import { FAQ } from "@/components/FAQ"; // Импортируем FAQ
+import { FAQ } from "@/components/FAQ";
 import { ShoppingCart } from "lucide-react";
 
 export default function Home() {
@@ -16,10 +16,10 @@ export default function Home() {
       <Navigator />
       <Mechanism />
       <Dosage />
-      <Advantages />
+      {/* <Advantages /> блок удален по запросу */}
       <Comparison />
       <WhereToBuy />
-      <FAQ />        {/* Добавили блок FAQ перед футером */}
+      <FAQ />
       <Footer />
 
       {/* STICKY BUY BUTTON (Только мобилка) */}
